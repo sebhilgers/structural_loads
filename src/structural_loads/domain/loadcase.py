@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from structural_loads.domain.actions import ActionCategory, ActionDefinition
+from structural_loads.domain.actions import ActionCategory, ActionDefinition, ActionType
 
 
 @dataclass(init=False)
@@ -32,6 +32,10 @@ class LoadCase:
     @property
     def category(self) -> ActionCategory:
         return self.action.category
+
+    @property
+    def actiontype(self) -> ActionType:
+        return self.action.type
 
     def __repr__(self) -> str:
         return (
@@ -70,4 +74,3 @@ Q_C = LoadCase(name="Nutzlast Kategorie C", category=ActionCategory.VERSAMMLUNG,
 Q_D = LoadCase(name="Nutzlast Kategorie D", category=ActionCategory.COMMERCIAL, description="Verkaufsflächen")
 Q_E = LoadCase(name="Nutzlast Kategorie E", category=ActionCategory.LAGER, description="Lager- und Werkstattflächen")
 W = LoadCase(name="Wind", category=ActionCategory.WIND, description="Windlasten")
-

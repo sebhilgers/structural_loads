@@ -13,8 +13,19 @@ def test_loadcase_builds_action_definition_from_category():
     assert isinstance(loadcase.action, ActionDefinition)
     assert loadcase.action.category == ActionCategory.WIND
     assert loadcase.action.type == ActionType.VARIABLE
+    assert loadcase.actiontype == ActionType.VARIABLE
     assert loadcase.action.factors.psi_0 == 0.6
     assert loadcase.action.description == ""
+
+
+def test_loadcase_actiontype_is_derived_from_category():
+    permanent = LoadCase(name="G", category=ActionCategory.PERMANENT)
+    variable = LoadCase(name="Q", category=ActionCategory.SNOW)
+    accidental = LoadCase(name="A", category=ActionCategory.ANPRALL)
+
+    assert permanent.actiontype == ActionType.PERMANENT
+    assert variable.actiontype == ActionType.VARIABLE
+    assert accidental.actiontype == ActionType.ACCIDENTAL
 
 
 def test_loadcase_repr():

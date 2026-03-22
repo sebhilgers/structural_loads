@@ -68,15 +68,6 @@ class LoadCollection:
         self._loads.append(load)
         return load
 
-    def add_area_load(
-        self,
-        name: str,
-        loadcase: LoadCase,
-        value: float,
-        unit: str = "kN/m²",
-    ) -> AreaLoad:
-        return self.add_areaload(name=name, loadcase=loadcase, value=value, unit=unit)
-
     def add_lineload(
         self,
         name: str,
@@ -88,15 +79,6 @@ class LoadCollection:
         self._loads.append(load)
         return load
 
-    def add_line_load(
-        self,
-        name: str,
-        loadcase: LoadCase,
-        value: float,
-        unit: str = "kN/m",
-    ) -> LineLoad:
-        return self.add_lineload(name=name, loadcase=loadcase, value=value, unit=unit)
-
     def add_pointload(
         self,
         name: str,
@@ -107,15 +89,6 @@ class LoadCollection:
         load = PointLoad(name=name, loadcase=loadcase, value=value, unit=unit)
         self._loads.append(load)
         return load
-
-    def add_point_load(
-        self,
-        name: str,
-        loadcase: LoadCase,
-        value: float,
-        unit: str = "kN",
-    ) -> PointLoad:
-        return self.add_pointload(name=name, loadcase=loadcase, value=value, unit=unit)
 
     def sort_by_loadcase(self) -> None:
         self._loads.sort(key=self._loadcase_sort_key)
@@ -138,8 +111,9 @@ class LoadCollection:
         return pd.DataFrame(rows, columns=_DF_COLUMNS)
 
     @staticmethod
-    def _loadcase_sort_key(load: Load) -> tuple[str, str, str, str, str]:
+    def _loadcase_sort_key(load: Load) -> tuple[int, str, str, str, str, str]:
         return (
+            _ACTION_TYPE_ORDER[load.loadcase.actiontype],
             load.loadcase.name,
             load.loadcase.category.value,
             load.loadcase.description or "",
@@ -151,7 +125,7 @@ class LoadCollection:
     def _action_definition_sort_key(load: Load) -> tuple[int, str, str, str, str, str]:
         action = load.loadcase.action
         return (
-            _ACTION_TYPE_ORDER[action.type],
+            _ACTION_TYPE_ORDER[load.loadcase.actiontype],
             action.category.value,
             action.description,
             load.loadcase.name,
@@ -168,7 +142,7 @@ class LoadCollection:
             "loadcase_name": load.loadcase.name,
             "loadcase_category": load.loadcase.category.value,
             "loadcase_description": load.loadcase.description,
-            "action_type": action.type.value,
+            "action_type": load.loadcase.actiontype.value,
             "action_description": action.description,
             "value": load.value,
             "unit": load.unit,

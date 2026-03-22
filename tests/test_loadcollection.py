@@ -24,21 +24,28 @@ def test_loadcollection_add_methods_create_and_store_loads():
     assert [load.name for load in collection.loads] == ["q_snow", "w_edge", "P_column"]
 
 
+def test_loadcollection_exposes_only_compact_add_method_names():
+    assert not hasattr(LoadCollection, "add_area_load")
+    assert not hasattr(LoadCollection, "add_line_load")
+    assert not hasattr(LoadCollection, "add_point_load")
+
+
 def test_loadcollection_sort_by_loadcase_reorders_collection():
     collection = LoadCollection(name="sorted by loadcase")
-    lc_snow = LoadCase(name="LC1", category=ActionCategory.SNOW)
-    lc_wind = LoadCase(name="LC2", category=ActionCategory.WIND)
+    lc_accidental = LoadCase(name="LC1", category=ActionCategory.ANPRALL)
+    lc_variable = LoadCase(name="LC2", category=ActionCategory.SNOW)
+    lc_permanent = LoadCase(name="LC3", category=ActionCategory.PERMANENT)
 
-    collection.add_pointload(name="P_roof", loadcase=lc_wind, value=8.0)
-    collection.add_lineload(name="w_beam", loadcase=lc_snow, value=2.0)
-    collection.add_areaload(name="q_slab", loadcase=lc_snow, value=1.5)
+    collection.add_pointload(name="A_impact", loadcase=lc_accidental, value=8.0)
+    collection.add_lineload(name="Q_snow", loadcase=lc_variable, value=2.0)
+    collection.add_areaload(name="G_slab", loadcase=lc_permanent, value=1.5)
 
     collection.sort_by_loadcase()
 
-    assert [(load.loadcase.name, load.name) for load in collection] == [
-        ("LC1", "q_slab"),
-        ("LC1", "w_beam"),
-        ("LC2", "P_roof"),
+    assert [(load.loadcase.actiontype, load.name) for load in collection] == [
+        (ActionType.PERMANENT, "G_slab"),
+        (ActionType.VARIABLE, "Q_snow"),
+        (ActionType.ACCIDENTAL, "A_impact"),
     ]
 
 
@@ -47,17 +54,20 @@ def test_loadcollection_sort_by_action_definition_reorders_collection():
     lc_wind = LoadCase(name="LC3", category=ActionCategory.WIND)
     lc_perm = LoadCase(name="LC1", category=ActionCategory.PERMANENT)
     lc_snow = LoadCase(name="LC2", category=ActionCategory.SNOW)
+    lc_acc = LoadCase(name="LC0", category=ActionCategory.ANPRALL)
 
     collection.add_lineload(name="w_edge", loadcase=lc_wind, value=3.0)
     collection.add_pointload(name="P_wall", loadcase=lc_perm, value=12.0)
     collection.add_areaload(name="q_snow", loadcase=lc_snow, value=1.8)
+    collection.add_pointload(name="P_barrier", loadcase=lc_acc, value=20.0)
 
     collection.sort_by_action_definition()
 
-    assert [(load.loadcase.category, load.name) for load in collection] == [
-        (ActionCategory.PERMANENT, "P_wall"),
-        (ActionCategory.SNOW, "q_snow"),
-        (ActionCategory.WIND, "w_edge"),
+    assert [(load.loadcase.actiontype, load.name) for load in collection] == [
+        (ActionType.PERMANENT, "P_wall"),
+        (ActionType.VARIABLE, "q_snow"),
+        (ActionType.VARIABLE, "w_edge"),
+        (ActionType.ACCIDENTAL, "P_barrier"),
     ]
 
 
